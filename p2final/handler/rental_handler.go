@@ -17,6 +17,15 @@ func NewRentalHandler(s service.RentalService) *RentalHandler {
 	return &RentalHandler{service: s}
 }
 
+// @Summary      Get user's rental history
+// @Description  Retrieves the authenticated user's car rental history
+// @Tags         rentals
+// @Produce      json
+// @Success      200  {object} []dto.RentalHistoryResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Failure      500  {object} dto.ErrorResponse
+// @Router       /users/rentalhistory [get]
+// @Security     ApiKeyAuth
 func (h *RentalHandler) GetUserRentalHistories(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {

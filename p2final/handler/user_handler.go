@@ -17,6 +17,17 @@ func NewUserHandler(s service.UserService) *UserHandler {
 	return &UserHandler{service: s}
 }
 
+// @Summary      Top up user balance
+// @Description  Add balance to the authenticated user's account
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.TopUpRequest true "Top up amount"
+// @Success      200  {object} dto.TopupResponse
+// @Failure      400  {object} dto.ErrorResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Router       /users/topup [post]
+// @Security     ApiKeyAuth
 func (h *UserHandler) TopUp(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {
@@ -42,6 +53,15 @@ func (h *UserHandler) TopUp(c echo.Context) error {
 	return helper.SendSuccess(c, http.StatusOK, "Balance added successfully", response)
 }
 
+// @Summary      Get user profile
+// @Description  Retrieve the authenticated user's profile and balance
+// @Tags         users
+// @Produce      json
+// @Success      200  {object} dto.MeResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Failure      500  {object} dto.ErrorResponse
+// @Router       /users/me [get]
+// @Security     ApiKeyAuth
 func (h *UserHandler) GetMe(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {

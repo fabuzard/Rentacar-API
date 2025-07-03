@@ -1,17 +1,32 @@
+// @title        Car Rental API
+// @version      1.0
+// @description  Final Project Phase 2 - Car Rental System API
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name   Fahreza Abuzard Alghifary
+// @contact.email  fabuzard123@gmail.com
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /
+
 package main
 
 import (
 	"fmt"
-	"net/http"
-	"os"
 	"p2final/config"
 	"p2final/handler"
-	"p2final/middleware"
 	"p2final/model"
 	"p2final/repository"
+	"p2final/routes"
 	"p2final/service"
 
+	_ "p2final/docs" // This line is necessary for swag to find docs
+
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func main() {
@@ -20,63 +35,33 @@ func main() {
 
 	e := echo.New()
 	config.DB.AutoMigrate(&model.User{}, &model.Car{}, &model.RentalHistory{}, &model.TransactionHistory{})
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Repositories
 	userRepo := repository.NewUserRepository(db)
 	carRepo := repository.NewCarRepository(db)
 	bookingRepo := repository.NewBookingRepository(db)
+	rentalRepo := repository.NewRentalRepository(db)
+	transactionRepo := repository.NewTransactionRepository(db)
 
 	// Services
 	userService := service.NewUserService(userRepo)
 	carService := service.NewCarService(carRepo)
 	bookingService := service.NewBookingService(bookingRepo)
+	rentalService := service.NewRentalService(rentalRepo)
+	transactionService := service.NewTransactionService(transactionRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(userService)
 	userHandler := handler.NewUserHandler(userService)
 	carHandler := handler.NewCarHandler(carService)
 	bookingHandler := handler.NewBookingHandler(bookingService)
-
-	rentalRepo := repository.NewRentalRepository(db)
-	rentalService := service.NewRentalService(rentalRepo)
 	rentalHandler := handler.NewRentalHandler(rentalService)
-
-	transactionRepo := repository.NewTransactionRepository(db)
-	transactionService := service.NewTransactionService(transactionRepo)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	// Routes
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "🚀 Server running and DB connected!")
-	})
-
-	// Auth
-	e.POST("/register", authHandler.Register)
-	e.POST("/login", authHandler.Login)
-
-	// User
-	e.GET("/me", userHandler.GetMe, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-
-	e.POST("/topup", userHandler.TopUp, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-
-	// Cars
-	e.POST("/cars", carHandler.CreateCar, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-	e.GET("/cars", carHandler.GetAvailableCars, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-	e.GET("/cars/mine", carHandler.GetMyCars, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-	e.DELETE("/cars/:id", carHandler.DeleteCar, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-
-	// Booking
-	e.POST("/bookings", bookingHandler.BookCar, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-	e.POST("/returncar", bookingHandler.ReturnCar, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-	// e.POST("/bookings/:id/pay", bookingHandler.PayBooking, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-
-	// rental
-	e.GET("/rentalhistories", rentalHandler.GetUserRentalHistories, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
-
-	// Transaction
-	e.GET("/transactionhistories", transactionHandler.GetMyTransactions, middleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
+	routes.SetupRoutes(e, authHandler, userHandler, carHandler, bookingHandler, rentalHandler, transactionHandler)
 
 	fmt.Println("Connected to DB")
-
 	e.Logger.Fatal(e.Start(":8080"))
 }

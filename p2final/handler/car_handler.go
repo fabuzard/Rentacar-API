@@ -19,6 +19,17 @@ func NewCarHandler(s service.CarService) *CarHandler {
 	return &CarHandler{service: s}
 }
 
+// @Summary      Register a new car
+// @Description  Allows a user to register a new car for rent
+// @Tags         cars
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateCarRequest true "Car details"
+// @Success      201  {object} dto.CreateCarResponse
+// @Failure      400  {object} dto.ErrorResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Router       /cars [post]
+// @Security     ApiKeyAuth
 func (h *CarHandler) CreateCar(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {
@@ -55,11 +66,14 @@ func (h *CarHandler) CreateCar(c echo.Context) error {
 	return helper.SendSuccess(c, http.StatusCreated, "Car registered successfully", response)
 }
 
+// @Summary      Get available cars
+// @Description  Lists all available cars for rent
+// @Tags         cars
+// @Produce      json
+// @Success      200  {object} []dto.GetCarResponse
+// @Failure      500  {object} dto.ErrorResponse
+// @Router       /cars/available [get]
 func (h *CarHandler) GetAvailableCars(c echo.Context) error {
-	_, err := helper.ExtractUserID(c)
-	if err != nil {
-		return helper.SendError(c, http.StatusUnauthorized, "UNAUTHORIZED", "Invalid or missing token", err.Error())
-	}
 
 	cars, err := h.service.GetAllAvailable()
 	if err != nil {
@@ -88,6 +102,15 @@ func (h *CarHandler) GetAvailableCars(c echo.Context) error {
 	return helper.SendSuccess(c, http.StatusOK, "Available cars", response)
 }
 
+// @Summary      Get my cars
+// @Description  Lists all cars owned by the authenticated user
+// @Tags         cars
+// @Produce      json
+// @Success      200  {object} []dto.GetCarResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Failure      500  {object} dto.ErrorResponse
+// @Router       /cars/mine [get]
+// @Security     ApiKeyAuth
 func (h *CarHandler) GetMyCars(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {
@@ -112,6 +135,20 @@ func (h *CarHandler) GetMyCars(c echo.Context) error {
 	}
 	return helper.SendSuccess(c, http.StatusOK, "Your cars", response)
 }
+
+// @Summary      Delete a car
+// @Description  Deletes a car owned by the authenticated user
+// @Tags         cars
+// @Produce      json
+// @Param        id path int true "Car ID"
+// @Success      200  {object} dto.DeletedCarResponse
+// @Failure      400  {object} dto.ErrorResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Failure      403  {object} dto.ErrorResponse
+// @Failure      404  {object} dto.ErrorResponse
+// @Failure      500  {object} dto.ErrorResponse
+// @Router       /cars/{id} [delete]
+// @Security     ApiKeyAuth
 func (h *CarHandler) DeleteCar(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {

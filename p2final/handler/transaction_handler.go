@@ -17,6 +17,15 @@ func NewTransactionHandler(s service.TransactionService) *TransactionHandler {
 	return &TransactionHandler{service: s}
 }
 
+// @Summary      Get transaction history
+// @Description  Retrieves the authenticated user's transaction history
+// @Tags         transactions
+// @Produce      json
+// @Success      200  {array}  dto.TransactionResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Failure      500  {object} dto.ErrorResponse
+// @Router       /users/transactionhistory [get]
+// @Security     ApiKeyAuth
 func (h *TransactionHandler) GetMyTransactions(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {

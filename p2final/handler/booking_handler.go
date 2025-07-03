@@ -17,6 +17,16 @@ func NewBookingHandler(s service.BookingService) *BookingHandler {
 	return &BookingHandler{bookingService: s}
 }
 
+// @Summary      Book a car
+// @Description  Allows a user to book a car by ID
+// @Tags         bookings
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.BookCarRequest true "Car ID to book"
+// @Success      201  {object} dto.BookingResponse
+// @Failure      400  {object} dto.ErrorResponse
+// @Router       /bookings [post]
+// @Security     ApiKeyAuth
 func (h *BookingHandler) BookCar(c echo.Context) error {
 	userID, err := helper.ExtractUserID(c)
 	if err != nil {
@@ -50,6 +60,17 @@ func (h *BookingHandler) BookCar(c echo.Context) error {
 	return helper.SendSuccess(c, http.StatusCreated, "Car booked successfully", response)
 }
 
+// GetAllUsers godoc
+// @Summary      Return a rented car
+// @Description  Allows a user to return a previously rented car by Rental ID
+// @Tags         bookings
+// @Produce      json
+// @Param        request  body  dto.ReturnCarRequest  true  "Return payload"
+// @Success      200   {object} dto.SuccessResponse
+// @Failure      400  {object} dto.ErrorResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Router       /bookings/return [post]
+// @Security     ApiKeyAuth
 func (h *BookingHandler) ReturnCar(c echo.Context) error {
 	var req dto.ReturnCarRequest
 

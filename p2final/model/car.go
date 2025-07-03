@@ -6,6 +6,7 @@ import (
 
 type Car struct {
 	gorm.Model
+	ID          uint   `gorm:"primaryKey"`
 	Name        string `gorm:"type:varchar(100);not null"`
 	Code        string `gorm:"type:varchar(50);unique;not null"`
 	Category    string `gorm:"type:varchar(50);not null"`

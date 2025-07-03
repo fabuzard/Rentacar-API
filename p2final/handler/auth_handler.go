@@ -17,6 +17,15 @@ func NewAuthHandler(s service.UserService) *AuthHandler {
 	return &AuthHandler{Service: s}
 }
 
+// @Summary      Register a new user
+// @Description  Creates a new user account with name, email, and password
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.RegisterRequest true "User registration data"
+// @Success      201  {object} dto.UserResponse
+// @Failure      400  {object} dto.ErrorResponse
+// @Router       /auth/register [post]
 func (h *AuthHandler) Register(c echo.Context) error {
 	var u dto.RegisterRequest
 	if err := c.Bind(&u); err != nil {
@@ -37,6 +46,17 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	return helper.SendSuccess(c, http.StatusCreated, "User registered successfully", response)
 }
 
+// @Summary      User login
+// @Description  Authenticates user and returns a JWT token
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.LoginRequest true "User login credentials"
+// @Success      200  {object} map[string]string
+// @Failure      400  {object} dto.ErrorResponse
+// @Failure      401  {object} dto.ErrorResponse
+// @Failure      500  {object} dto.ErrorResponse
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(c echo.Context) error {
 	var u dto.LoginRequest
 	if err := c.Bind(&u); err != nil {
