@@ -15,7 +15,7 @@
 package main
 
 import (
-	"fmt"
+	"os"
 	"p2final/config"
 	"p2final/handler"
 	"p2final/model"
@@ -62,6 +62,10 @@ func main() {
 	// Routes
 	routes.SetupRoutes(e, authHandler, userHandler, carHandler, bookingHandler, rentalHandler, transactionHandler)
 
-	fmt.Println("Connected to DB")
-	e.Logger.Fatal(e.Start(":8080"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	e.Logger.Fatal(e.Start(":" + port))
 }
